@@ -34,8 +34,8 @@ class Parameter:
                 f'{self.code}_avg_time': self.total_time / self.count}
 
     def print(self):
-        print("{name} - avg: {avg_time}, min: {min_time}, max: {max_time}, total: {total_time}, count: {count}".format(
-            **self.get()))
+        print("{name:20} - avg: {avg_time:.6f}, min: {min_time:.6f}, max: {max_time:.6f}, "
+              "total: {total_time:.6f}, count: {count}".format(**self.get()))
 
 
 class Counter:

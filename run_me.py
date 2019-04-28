@@ -95,9 +95,11 @@ except Exception as e:
                         repr(format_tb(exc_traceback))))
 
 if args.output:
+    timestamp = int(time())
     result = {
+        'timestamp': timestamp,
         'instr_num': len(instruments),
-        'total_time': (time() - app_start_at),
+        'total_time': (timestamp - app_start_at),
         **counter.get_dict()
     }
     if not os.path.exists(args.output):
