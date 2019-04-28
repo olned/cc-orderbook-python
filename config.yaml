@@ -1,0 +1,27 @@
+log:
+  version: 1
+  formatters:
+    detailed:
+      class: logging.Formatter
+      format: '%(asctime)s %(name)s %(funcName)s %(levelname)s %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: WARNING
+    file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: INFO
+      filename: ./book.log
+      when: midnight
+      backupCount: 10
+      formatter: detailed
+    errors:
+      class: logging.handlers.TimedRotatingFileHandler
+      filename: ./book-errors.log
+      when: midnight
+      backupCount: 10
+      level: ERROR
+      formatter: detailed
+  root:
+    level: INFO
+    handlers: [file, errors] #console,
