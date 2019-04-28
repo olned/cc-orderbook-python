@@ -72,5 +72,5 @@ except Exception as e:
     print(e)
     print(conn.last_message)
 
-print("Number of instruments:", len(instruments))
+print(f"Number of instruments: {len(instruments)}\n {'='*7} Time Measurements in ms {'='*7}")
 counter.report()
