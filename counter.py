@@ -19,22 +19,29 @@ class Parameter:
         self.total_time += new_time
 
     def get(self):
-        return {'name': self.name, 'min_time': self.min_time, 'max_time': self.max_time,
+        return {'name': self.name,
+                'min_time': self.min_time,
+                'max_time': self.max_time,
+                "total_time": self.total_time,
+                'count': self.count,
                 'avg_time': self.total_time / self.count}
 
     def get_dict(self):
         return {f'{self.code}_min_time': self.min_time,
                 f'{self.code}_max_time': self.max_time,
+                f'{self.code}_count': self.count,
+                f'{self.code}_total_time': self.total_time,
                 f'{self.code}_avg_time': self.total_time / self.count}
 
     def print(self):
-        print("{name} - avg: {avg_time}, min: {min_time}, max: {max_time}".format(**self.get()))
+        print("{name} - avg: {avg_time}, min: {min_time}, max: {max_time}, total: {total_time}, count: {count}".format(
+            **self.get()))
 
 
 class Counter:
     def __init__(self):
-        self.book_process = Parameter("book process", "book")
         self.ws_latency = Parameter("websocket latency", "ws")
+        self.book_process = Parameter("book process", "book")
         self.pack_msg = Parameter("pack msg", "pack")
         self.unpack_msg = Parameter("unpack msg", "unpack")
 
@@ -44,8 +51,8 @@ class Counter:
 
     def report(self):
         if self.book_process.count:
-            self.book_process.print()
             self.ws_latency.print()
+            self.book_process.print()
             self.pack_msg.print()
             self.unpack_msg.print()
             print(f"total count {self.book_process.count}")

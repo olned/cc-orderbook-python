@@ -64,11 +64,10 @@ class L2OrderBook:
         else:
             start_at = time() * 1000
             server_time = message[-1]
-
             self.set_l2update(message)
-
             self.handle_time(server_time, start_at, time() * 1000)
-            if self.on_changed:
+
+            if self.on_changed and len(self.bids) >= 25 and len(self.asks) >= 25:
                 await self.on_changed(self)
 
     async def subscribe_book(self, conn, handle_time, on_changed=None):
