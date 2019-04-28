@@ -5,6 +5,7 @@ from half_book import HalfSnap
 
 class L2OrderBook:
     handle_time = None
+    on_changed = None
 
     def __init__(self, instrument: str):
         self.instrument = instrument
@@ -56,20 +57,23 @@ class L2OrderBook:
                 self._bids.update(price, size)
 
     async def handle_subscription(self, message):
-        start_at = time() * 1000
-        server_time = message[-1]
-
         if isinstance(message[1][0], list):
             self.set_snapshot(message)
         elif isinstance(message[1][0], str):
             pass
         else:
+            start_at = time() * 1000
+            server_time = message[-1]
+
             self.set_l2update(message)
 
-        self.handle_time(server_time, start_at, time() * 1000)
+            self.handle_time(server_time, start_at, time() * 1000)
+            if self.on_changed:
+                await self.on_changed(self)
 
-    async def subscribe_book(self, conn, handle_time):
+    async def subscribe_book(self, conn, handle_time, on_changed=None):
         self.handle_time = handle_time
+        self.on_changed = on_changed
         await conn.subscribe({
             "channel": "book",
             "symbol": self.instrument
