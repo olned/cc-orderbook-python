@@ -1,59 +1,69 @@
+import argparse
 import asyncio
+import json
 import logging
 import sys
+from time import time
 
 from ssc2ce import Bitfinex
 
+from counter import Counter
 from instruments import SYMBOLS
 from orderbook import L2OrderBook
 
-logging.basicConfig(format='%(asctime)s %(name)s %(funcName)s %(levelname)s %(message)s', level=logging.WARNING)
+parser = argparse.ArgumentParser('Bitfinex Order Book Example.')
+parser.add_argument('-s', '--stop', dest='stop_in', type=int, default=0,
+                    help='Stop the script after a specified time in seconds. Default 0 - do not stop')
+parser.add_argument('-l', '--log_level', type=str, default='WARNING')
+parser.add_argument('-n', '--num_instruments', type=int, default=None,
+                    help='Get first N instruments from the instruments.py file. Default None - do not use')
+parser.add_argument('-i', '--instrument', nargs='*', dest='instrument', default=['tBTCUSD'])
+args = parser.parse_args()
+
+logging.basicConfig(format='%(asctime)s %(name)s %(funcName)s %(levelname)s %(message)s', level=args.log_level)
 logger = logging.getLogger("ons-derobit-ws-python-sample")
 
 conn = Bitfinex()
 
 books = []
 instruments = []
-if len(sys.argv) > 1:
-    if sys.argv[1].isdigit():
-        instruments += ['t' + t.upper() for t in SYMBOLS[:int(sys.argv[1])]]
-    else:
-        instruments += sys.argv[1:]
+
+if args.num_instruments:
+    instruments += ['t' + t.upper() for t in SYMBOLS[:args.num_instruments]]
 else:
-    instruments.append("tBTCUSD")
-
-
-class Counter:
-    count = 0
-    local_latency = 0.0
-    ws_latency = 0.0
-
-    def add(self, server_time, start_at, end_at):
-        self.count += 1
-        self.local_latency += (end_at - start_at)
-        self.ws_latency += (start_at - server_time)
-
-    def report(self):
-        if self.count:
-            print(
-                f"avg local latency:{self.local_latency / self.count}\n"
-                f"avg websocket latency:{self.ws_latency / self.count}\n"
-                f"total count {self.count}")
-
+    instruments += args.instrument
 
 counter = Counter()
+loop = asyncio.get_event_loop()
+
+
+async def on_change(book: L2OrderBook):
+    start_at = time() * 1000
+    msg = dict(asks=book.asks[:25], bids=book.bids[:25])
+    message = json.dumps(msg)
+    counter.pack_msg.count_it(time() * 1000 - start_at)
+
+    start_at = time() * 1000
+    data = json.loads(message)
+    len(data)
+    counter.unpack_msg.count_it(time() * 1000 - start_at)
 
 
 async def subscribe():
     for instrument in instruments:
         order_book = L2OrderBook(instrument)
         books.append(order_book)
-        await order_book.subscribe_book(conn, counter.add)
+        await order_book.subscribe_book(conn, counter.add, on_change)
 
+
+def stop():
+    asyncio.ensure_future(conn.stop())
+
+
+if args.stop_in:
+    loop.call_later(args.stop_in, stop)
 
 conn.on_connect_ws = subscribe
-
-loop = asyncio.get_event_loop()
 
 try:
     loop.run_until_complete(conn.run_receiver())
