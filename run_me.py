@@ -2,7 +2,6 @@ import argparse
 import asyncio
 import json
 import logging
-import sys
 from time import time
 
 from ssc2ce import Bitfinex
