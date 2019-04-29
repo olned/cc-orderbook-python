@@ -41,20 +41,20 @@ class Parameter:
 class Counter:
     def __init__(self):
         self.ws_latency = Parameter("websocket latency", "ws")
-        self.unpack_income_msg = Parameter("unpack income message", "unpack_changes")
+        self.unpack_and_route = Parameter("unpack and route incoming messages", "unpack_and_route")
         self.book_process = Parameter("book process", "book")
         self.pack_msg = Parameter("simulation pack", "pack_snap")
         self.unpack_msg = Parameter("simulation unpack", "unpack_snap")
 
     def add(self, server_time, receipt_time, start_at, end_at):
         self.ws_latency.count_it(receipt_time - server_time)
-        self.unpack_income_msg.count_it(start_at - receipt_time)
+        self.unpack_and_route.count_it(start_at - receipt_time)
         self.book_process.count_it(end_at - start_at)
 
     def report(self):
         if self.ws_latency.count:
             self.ws_latency.print()
-            self.unpack_income_msg.print()
+            self.unpack_and_route.print()
             self.book_process.print()
             self.pack_msg.print()
             self.unpack_msg.print()
@@ -63,7 +63,7 @@ class Counter:
     def get_dict(self):
         return {
             **self.ws_latency.get_dict(),
-            **self.unpack_income_msg.get_dict(),
+            **self.unpack_and_route.get_dict(),
             **self.book_process.get_dict(),
             **self.pack_msg.get_dict(),
             **self.unpack_msg.get_dict(),
