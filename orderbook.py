@@ -71,7 +71,7 @@ class L2OrderBook:
 
         return False
 
-    async def handle_subscription(self, message):
+    async def handle_subscription(self, message, sender):
         if self.handle_message(message):
             if self.on_changed and len(self.bids) >= 25 and len(self.asks) >= 25:
                 await self.on_changed(self)
