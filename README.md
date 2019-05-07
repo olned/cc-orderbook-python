@@ -6,6 +6,11 @@ To list arguments:
 python run_me.py -h
 ```
 
+## Requirements
+Python >= 3.6
+
+Python >= 3.7.3 is needed to run parser_book.py 
+
 ## Measurements
 The process of feeding and maintaining a book of orders can be divided into 5 parts. This way we have five measurement 
 parameters::
