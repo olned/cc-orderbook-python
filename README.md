@@ -19,10 +19,3 @@ parameters::
 3. processing the message and making changes to the order book
 4. packaging and transferring a snapshot of a book to a message queue (simulation)
 5. receiving and unpacking a snapshot from the message queue (simulation) 
-
-## Bitfinex Features
-Bitfinex feed feature has one specific. The batch of changes look as a sequence of changes with the same timestamp. 
-Usually first come changes which remove levels, some times bids or asks can been even empty, 
-then come changes which add levels, and eventualy the book is filled.   
-
-Therefore, the on_change event is called only at the end of batch when the book is filled.
