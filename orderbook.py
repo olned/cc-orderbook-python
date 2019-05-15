@@ -56,19 +56,25 @@ class L2OrderBook:
             else:
                 self._bids.update(price, size)
 
-    async def handle_subscription(self, message, sender):
+    def handle_message(self, message):
         if isinstance(message[1][0], list):
             self.set_snapshot(message)
         elif isinstance(message[1][0], str):
             pass
         else:
-            start_at = time() * 1000
-            server_time = message[-1]
             self.set_l2update(message)
-            self.handle_time(server_time, sender.receipt_time * 1000, start_at, time() * 1000)
+            return True
 
-            if self.on_changed and len(self.bids) >= 25 and len(self.asks) >= 25:
-                await self.on_changed(self)
+        return False
+
+    async def handle_subscription(self, message, sender):
+        start_at = time() * 1000
+        server_time = message[-1]
+        if self.handle_message(message):
+            if self.handle_time:
+                self.handle_time(server_time, sender.receipt_time * 1000, start_at, time() * 1000)
+
+            await self.on_changed(self)
 
     async def subscribe_book(self, conn, handle_time, on_changed=None):
         self.handle_time = handle_time
